@@ -60,3 +60,23 @@ describe('Promise resolve或reject 之后状态不可逆', () => {
   })
 
 })
+
+test('支持同步then回调', () => {
+  const value = 'resolve'
+  new MyPromise((resolve) => {
+    resolve(value)
+  }).then((cbValue) => {
+    expect(cbValue).toBe(value)
+  })
+})
+
+test('支持异步then回调', () => {
+  const value = 'resolve'
+  new MyPromise((resolve) => {
+    setTimeout(() => {
+      resolve(value)
+    }, 1000)
+  }).then((cbValue) => {
+    expect(cbValue).toBe(value)
+  })
+})
