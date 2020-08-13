@@ -101,7 +101,16 @@ test('executor抛错的状态是rejected', () => {
   const promise = new MyPromise(() => {
     throw new Error();
   }).then(null, (reason) => {
-    expect(promise.reason).toThrowError(Error);
+    expect(reason).toThrowError(Error);
+    expect(promise.state).toBe(State.Rejected);
+  })
+})
+
+test('支持catch', () => {
+  const promise = new MyPromise(() => {
+    throw new Error();
+  }).catch((reason) => {
+    expect(reason).toThrowError(Error);
     expect(promise.state).toBe(State.Rejected);
   })
 })

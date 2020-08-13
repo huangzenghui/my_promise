@@ -98,4 +98,8 @@ export default class MyPromise {
     })
   }
 
+  catch = (onRejected?: ((value: any) => any) | undefined | null): MyPromise => {
+    return this.then(null, onRejected);
+  }
+
 }
