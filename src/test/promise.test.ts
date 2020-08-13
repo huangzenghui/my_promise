@@ -80,3 +80,119 @@ test('支持异步then回调', () => {
     expect(cbValue).toBe(value)
   })
 })
+
+describe('支持链式调用', () => {
+
+  test('正确resolve执行回调', () => {
+    const resolvedFn = jest.fn();
+    const rejectFn = jest.fn();
+    new MyPromise((resolve) => {
+      setTimeout(() => {
+        resolve(1)
+      }, 1000)
+    }).then(resolvedFn, rejectFn).then(() => {
+      expect(resolvedFn).toHaveBeenCalled();
+      expect(rejectFn).not.toHaveBeenCalled();
+    })
+  })
+
+  test('正确reject执行回调', () => {
+    const resolvedFn = jest.fn();
+    const rejectFn = jest.fn();
+    new MyPromise((resolve, reject) => {
+      setTimeout(() => {
+        reject(1)
+      }, 1000)
+    }).then(resolvedFn, rejectFn).then(() => {
+      expect(resolvedFn).not.toHaveBeenCalled();
+      expect(rejectFn).toHaveBeenCalled();
+    })
+  })
+
+  it('同步调用', () => {
+    new MyPromise((resolve) => {
+      resolve(1)
+    }).then((value: any) => {
+      expect(value).toBe(1);
+      return 2
+    }).then((value: any) => {
+      expect(value).toBe(2);
+    })
+  })
+
+  it('异步调用', () => {
+    new MyPromise((resolve) => {
+      setTimeout(() => {
+        resolve(1);
+      }, 100)
+    }).then((value: any) => {
+      expect(value).toBe(1);
+      return 2
+    }).then((value: any) => {
+      expect(value).toBe(2);
+    })
+  })
+
+  test('异步reject调用', (done) => {
+    new MyPromise((resolve, reject) => {
+      setTimeout(() => {
+        reject(1);
+      }, 100)
+    }).then(null, (reason) => {
+      expect(reason).toBe(1);
+      return 2;
+    }).then((value: any) => {
+      expect(value).toBe(2);
+      done();
+    })
+  })
+
+  it('返回promise', () => {
+    new MyPromise((resolve) => {
+      setTimeout(() => {
+        resolve(1);
+      }, 100)
+    }).then((value: any) => {
+      expect(value).toBe(1);
+      return new MyPromise((resolve) => {
+        setTimeout(() => {
+          resolve(2);
+        }, 100)
+      })
+    }).then((value: any) => {
+      expect(value).toBe(2);
+    })
+  })
+
+  it('多个then回调', () => {
+    const promise = new MyPromise((resolve) => {
+      setTimeout(() => {
+        resolve(1);
+      }, 100)
+    }).then((value: any) => {
+      expect(value).toBe(1);
+      return 2
+    }).then((value: any) => {
+      expect(value).toBe(2);
+    })
+
+    promise.then((value: any) => {
+      expect(value).toBe(1);
+      return 3
+    }).then((value: any) => {
+      expect(value).toBe(3);
+    })
+  })
+
+  it('不能循环调用', () => {
+    const promise1 = new MyPromise((resolve) => {
+      resolve(1)
+    });
+    const promise2 = promise1.then(() => {
+      return promise1;
+    })
+    promise2.then(null, (reason) => {
+      expect(reason).toThrowError('循环调用');
+    })
+  })
+})
