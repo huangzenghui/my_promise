@@ -15,10 +15,10 @@ interface PromiseExecutorFunc {
 function handlePromise(promise: MyPromise, value: any, resolve: PromiseCallbackFunc, reject: PromiseCallbackFunc): void {
   if (promise === value) {
     // 避免循环调用
-    throw new Error('循环调用');
+    throw new TypeError('循环调用');
   }
-  if (value instanceof MyPromise) {
-    value.then(resolve, reject);
+  if (value && typeof value.then === 'function') { // 支持类Promise对象
+    value.then.call(value, resolve, reject);
   } else {
     resolve(value);
   }

@@ -195,4 +195,14 @@ describe('支持链式调用', () => {
       expect(reason).toThrowError('循环调用');
     })
   })
+
+  it('支持类Promise返回', () => {
+    new MyPromise((resolve) => {
+      resolve(1);
+    }).then(() => {
+      return { then(resolveFn: Function) { resolveFn(2) } }
+    }).then((val) => {
+      expect(val).toBe(2);
+    })
+  })
 })
