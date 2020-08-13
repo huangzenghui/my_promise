@@ -81,6 +81,31 @@ test('支持异步then回调', () => {
   })
 })
 
+test('支持then resolve非函数', () => {
+  new MyPromise((resolve) => {
+    resolve(1)
+  }).then().then((value) => {
+    expect(value).toBe(1);
+  })
+})
+
+test('支持then reject非函数', () => {
+  new MyPromise((resolve, reject) => {
+    reject(1)
+  }).then().then(null, (reason) => {
+    expect(reason).toBe(1);
+  })
+})
+
+test('executor抛错的状态是rejected', () => {
+  const promise = new MyPromise(() => {
+    throw new Error();
+  }).then(null, (reason) => {
+    expect(promise.reason).toThrowError(Error);
+    expect(promise.state).toBe(State.Rejected);
+  })
+})
+
 describe('支持链式调用', () => {
 
   test('正确resolve执行回调', () => {
