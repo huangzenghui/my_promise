@@ -239,4 +239,98 @@ describe('支持链式调用', () => {
       expect(val).toBe(2);
     })
   })
+
+  it('支持静态方法 resolve', () => {
+    expect(MyPromise.resolve(1)).resolves.toBe(1);
+  })
+
+  it('支持静态方法 reject', () => {
+    expect(MyPromise.reject(new Error())).rejects.toThrow();
+  })
+
+  describe('支持静态方法 all', () => {
+    test('resolve', (done) => {
+      MyPromise.all([
+        MyPromise.resolve(1),
+        new MyPromise((resolve) => {
+          setTimeout(() => {
+            resolve(2)
+          }, 100);
+        }),
+        MyPromise.resolve(3)
+      ]).then((values) => {
+        expect(values).toHaveLength(3);
+        values.forEach((value: number, index: number): void => {
+          expect(value).toBe(index + 1);
+        });
+        done();
+      })
+    })
+
+    test('reject', () => {
+      MyPromise.all([
+        MyPromise.resolve(1),
+        MyPromise.reject(2),
+        MyPromise.reject(3)
+      ]).catch((reason) => {
+        expect(reason).toBe(2);
+      })
+
+      MyPromise.all([
+        MyPromise.resolve(1),
+        new MyPromise((_, reject) => {
+          setTimeout(() => reject(2), 0)
+        }),
+        MyPromise.reject(3)
+      ]).catch((reason) => {
+        expect(reason).toBe(3);
+      })
+    })
+  })
+
+  describe('支持静态方法 race', () => {
+    test('resolve', () => {
+      MyPromise.race([
+        MyPromise.resolve(1),
+        new MyPromise((resolve) => {
+          setTimeout(() => {
+            resolve(2)
+          }, 100);
+        })
+      ]).then((value) => {
+        expect(value).toBe(1);
+      });
+
+      MyPromise.race([
+        new MyPromise((resolve) => {
+          setTimeout(() => {
+            resolve(1)
+          }, 100);
+        }),
+        MyPromise.resolve(2)
+      ]).then((value) => {
+        expect(value).toBe(2);
+      })
+    })
+
+    test('reject', () => {
+      MyPromise.all([
+        MyPromise.reject(1),
+        MyPromise.reject(2)
+      ]).catch((reason) => {
+        expect(reason).toHaveLength(1);
+      })
+
+      MyPromise.race([
+        new MyPromise((_, reject) => {
+          setTimeout(() => {
+            reject(1)
+          }, 100);
+        }),
+        MyPromise.reject(2)
+      ]).then((reason) => {
+        expect(reason).toBe(2);
+      })
+    })
+  })
 })

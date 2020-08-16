@@ -102,4 +102,36 @@ export default class MyPromise {
     return this.then(null, onRejected);
   }
 
+  static resolve(value: any): MyPromise {
+    return new MyPromise((resolve) => resolve(value));
+  }
+
+  static reject(reason: any): MyPromise {
+    return new MyPromise((_, reject) => reject(reason));
+  }
+
+  static all(promises: MyPromise[]): MyPromise {
+    return new MyPromise((resolve, reject) => {
+      const values: any[] = [];
+      let num = promises.length;
+      const promiseResolve = (value: any, index: number): void => {
+        values[index] = value;
+        num--;
+        if (num === 0) {
+          resolve(values);
+        }
+      }
+      promises.forEach((promise, index) => {
+        promise.then(value => promiseResolve(value, index)).catch(reject)
+      })
+    })
+  }
+
+  static race(promises: MyPromise[]): MyPromise {
+    return new MyPromise((resolve, reject) => {
+      promises.forEach((promise) => {
+        promise.then(resolve, reject)
+      })
+    })
+  }
 }
