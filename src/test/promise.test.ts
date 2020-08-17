@@ -115,6 +115,18 @@ test('支持catch', () => {
   })
 })
 
+test('resolve的是一个Promise', () => {
+  const p = new MyPromise((resolve) => {
+    setTimeout(() => resolve(1), 100);
+  });
+  expect(MyPromise.resolve(p)).resolves.toBe(1);
+})
+
+test('resolve的是一个类Promise', () => {
+  const p = { then: () => 1 };
+  expect(MyPromise.resolve(p)).resolves.toBe(1);
+})
+
 describe('支持链式调用', () => {
 
   test('正确resolve执行回调', () => {

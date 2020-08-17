@@ -52,7 +52,9 @@ export default class MyPromise {
     }
 
     try {
-      executor(resolve, reject);
+      executor((value) => {
+        handlePromise(this, value, resolve, reject);
+      }, reject);
     } catch (error) {
       // 错误捕获
       reject(error)
